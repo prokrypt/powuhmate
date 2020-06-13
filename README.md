@@ -23,4 +23,4 @@ Features
 
 ---
 
-LED behavior comments taken from https://github.com/stefansundin/powermate-linux/tree/master/bluetooth
+LED behavior comments taken (stolen?!?) from https://github.com/stefansundin/powermate-linux/tree/master/bluetooth
