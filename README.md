@@ -18,6 +18,7 @@ Features
 -
  - Fast and responsive
  - Minimum delay when controlling LEDs
+ - Filters out duplicate events from that horrible, horrible button
  - Did I mention it's fast?
 
 ---
