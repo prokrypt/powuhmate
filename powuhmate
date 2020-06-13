@@ -3,7 +3,7 @@
 set addr "00:12:92:08:2E:31"
 
 #debug?
-log_user 1
+log_user 0
 
 #LED values behavior:
 # 00 to 7F: ?
