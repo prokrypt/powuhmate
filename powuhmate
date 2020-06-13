@@ -1,0 +1,126 @@
+#!/usr/bin/expect
+
+set addr "00:12:92:08:2E:31"
+
+#debug?
+log_user 1
+
+#LED values behavior:
+# 00 to 7F: ?
+# 80: completely off
+# 81: completely on
+# 82 to 9F: no change?
+# A0: quick blink then low intensity
+# A1 to BF: from low to high intensity
+# C0 to FF: blinking at different speeds
+set light_initialize A0
+set light_initialize2 80
+set light_active C4
+set light_idle 80
+set idletimeout 1
+
+#let device send one battery status update after this many seconds
+set batteryupdate 600
+
+
+##Edit below this line at your own risk##
+
+spawn gatttool -I -b $addr
+set timeout $idletimeout
+set idle 1
+set batmon 1
+set bp "xx"
+expect "$addr" { send "connect\n" }
+while true {
+	expect {
+		-re {Notification handle = 0x002c value: (..)} {
+			#we got a user event. yeet!
+			if { $idle == 1 } {
+				set timeout $idletimeout
+				#we not idle anymore
+				set idle 0
+				#flash le lights
+				send "char-write-req 0x0029 $light_active\n"
+				#turn on le lights
+				#send "char-write-req 0x0029 A1\n"
+			}
+			set output $expect_out(1,string)
+			puts -nonewline "$bp%> "
+			switch -- $output {
+				68 { puts "CW"; exec xdotool key XF86AudioRaiseVolume }
+				67 { puts "CCW"; exec xdotool key XF86AudioLowerVolume }
+				70 { puts "PCW" }
+				69 { puts "PCCW" }
+				65 {
+					puts "Press"
+					exec xdotool key XF86AudioPlay
+					#eat next event, possibly a Press or even a CW/CCW
+					expect -timeout 1 "N"
+				}
+				72 { puts "Hold 1.0s"; exec xdotool key XF86AudioNext }
+				73 { puts "Hold 1.5s" }
+				74 { puts "Hold 2.0s" }
+				75 { puts "Hold 2.5s" }
+				76 { puts "Hold 3.0s" }
+				77 { puts "Hold 3.5s" }
+				66 {
+					puts "Release"
+					#eat the next duplicate release event
+					expect "66"
+					#eat the next event that comes in within 1 second, possibly a Press
+					expect -timeout 1 "N"
+				}
+				default { puts "Undefined: $output" }
+			}
+			#send "char-write-req 0x0029 FF\n"
+		}
+		-re {Notification handle = 0x0025 value: (..)} {
+			#battery event
+			set output $expect_out(1,string)
+			set bp [format %i 0x$output]
+			puts "Battery: $bp%"
+			#unsubscribe to battery notifications until next time!
+			send "char-write-req 0x0026 0000\n"
+			set batmon 0
+			exp_continue
+		}
+		"Connection successful" {
+			puts "Connected to Powermate!"
+			#let's subscribe to events!
+			send "char-write-req 0x002d 0100\n"
+			#let's subscribe to battery!
+			send "char-write-req 0x0026 0100\n"
+			set batmon 1
+			#blink le lights
+			send "char-write-req 0x0029 $light_initialize\n"
+			#set lights to off
+			send "char-write-req 0x0029 $light_initialize2\n"
+		}
+		"Disconnected" {
+			send "connect\n"
+			exp_continue
+		}
+		"Invalid file descriptor" {
+			send "connect\n"
+			exp_continue
+		}
+		"Connection refused" {
+			send "connect\n"
+			exp_continue
+		}
+		eof { }
+		timeout {
+			if { $idle == 0 } {
+				#oh we idle
+				#this timeout is also the battery update timeout
+				set timeout $batteryupdate
+				set idle 1
+				#turn off lights
+				send "char-write-req 0x0029 $light_idle\n"
+				exp_continue
+			}
+		}
+	}
+	#timeout reached. let's turn on battery notifications to update value
+	if { $batmon == 0 && $idle == 1 } { send "char-write-req 0x0026 0100\n"; set batmon 1 }
+}
