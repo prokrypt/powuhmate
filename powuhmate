@@ -26,7 +26,7 @@ set batteryupdate 600
 ##Edit below this line at your own risk##
 
 spawn gatttool -I -b $addr
-set timeout $idletimeout
+set timeout $batteryupdate
 set idle 1
 set batmon 1
 set bp "xx"
