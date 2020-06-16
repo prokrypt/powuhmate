@@ -108,6 +108,11 @@ while true {
 			send "connect\n"
 			exp_continue
 		}
+		"Too many open files" {
+			#... no clue. let's try to reconnect anyways!
+			end "connect\n"
+			exp_continue
+		}
 		eof { }
 		timeout {
 			if { $idle == 0 } {
