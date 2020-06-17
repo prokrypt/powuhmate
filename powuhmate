@@ -30,6 +30,7 @@ set timeout $batteryupdate
 set idle 1
 set batmon 1
 set bp "xx"
+global spawn_id
 expect "$addr" { send "connect\n" }
 while true {
 	expect {
@@ -109,9 +110,10 @@ while true {
 			exp_continue
 		}
 		"Too many open files" {
-			#... no clue. let's try to reconnect anyways!
-			end "connect\n"
-			exp_continue
+			#... no clue. let's restart gatttool
+			close
+			spawn gatttool -I -b $addr
+			send "connect\n"
 		}
 		eof { }
 		timeout {
