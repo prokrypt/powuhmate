@@ -1,5 +1,5 @@
 # powuhmate
-Griffin Powermate expect script and bash example
+BLUETOOTH Griffin Powermate expect script and bash example
 
 You will need gatttool.
 
