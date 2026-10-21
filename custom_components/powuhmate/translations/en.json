@@ -1,0 +1,13 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "confirm": { "description": "Set up PowerMate {address}?" },
+      "user": { "data": { "address": "Device" } }
+    },
+    "abort": {
+      "already_configured": "Already configured",
+      "no_devices_found": "No PowerMate found. Turn the knob to wake it and retry."
+    }
+  }
+}

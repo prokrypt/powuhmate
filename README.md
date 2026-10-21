@@ -24,3 +24,23 @@ Features
 ---
 
 LED behavior comments taken (stolen?!?) from https://github.com/stefansundin/powermate-linux/tree/master/bluetooth
+
+Home Assistant
+-
+`custom_components/powuhmate` is a Home Assistant integration (no gatttool needed; uses HA's Bluetooth stack, so ESPHome Bluetooth proxies work too).
+
+Install: add this repo as a HACS custom repository, or copy `custom_components/powuhmate` into your HA `config/custom_components/`, then restart. Turn the knob; HA discovers it.
+
+Each knob action fires a `powuhmate_event` with `address` and `action`:
+`press`, `release`, `cw`, `ccw`, `press_cw`, `press_ccw`, `hold_1` … `hold_6`.
+
+```yaml
+automation:
+  - trigger:
+      - platform: event
+        event_type: powuhmate_event
+        event_data: { action: cw }
+    action:
+      - service: media_player.volume_up
+        target: { entity_id: media_player.living_room }
+```

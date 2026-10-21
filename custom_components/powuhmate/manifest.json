@@ -1,0 +1,12 @@
+{
+  "domain": "powuhmate",
+  "name": "Griffin PowerMate Bluetooth",
+  "bluetooth": [{ "local_name": "PowerMate Bluetooth", "connectable": true }],
+  "codeowners": ["@prokrypt"],
+  "config_flow": true,
+  "dependencies": ["bluetooth_adapters"],
+  "documentation": "https://github.com/prokrypt/powuhmate",
+  "iot_class": "local_push",
+  "requirements": [],
+  "version": "0.1.0"
+}
